@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String      @unique
+  passwordHash  String?
+  avatar        String?
+  role          String      @default("USER") // USER or ADMIN
+  emailVerified DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  links         Link[]
+  apiKeys       ApiKey[]
+  tags          Tag[]
+  auditLogs     AuditLog[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Link {
+  id             String      @id @default(cuid())
+  userId         String?
+  shortCode      String      @unique
+  destinationUrl String
+  customAlias    String?     @unique
+  title          String?
+  description    String?
+  status         String      @default("ACTIVE") // ACTIVE, DISABLED, EXPIRED
+  passwordHash   String?
+  expiresAt      DateTime?
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  utmTerm        String?
+  utmContent     String?
+  clickCount     Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clicks         ClickEvent[]
+  tags           LinkTag[]
+  reports        Report[]
+  dailyStats     DailyLinkStats[]
+
+  @@index([shortCode])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  color     String?   @default("#6366f1")
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links     LinkTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model LinkTag {
+  linkId String
+  tagId  String
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([linkId, tagId])
+}
+
+model ClickEvent {
+  id          String   @id @default(cuid())
+  linkId      String
+  timestamp   DateTime @default(now())
+  country     String?
+  countryCode String?
+  region      String?
+  city        String?
+  deviceType  String?  // Desktop, Mobile, Tablet
+  browser     String?  // Chrome, Safari, Firefox, Edge, Other
+  os          String?  // Windows, macOS, iOS, Android, Linux
+  referrer    String?  // Google, X, Direct, LinkedIn, etc.
+  referrerUrl String?
+  ipHash      String?  // SHA-256 hashed with rotating salt
+  userAgent   String?
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId, timestamp])
+  @@index([timestamp])
+  @@index([countryCode])
+  @@index([deviceType])
+}
+
+model DailyLinkStats {
+  id             String   @id @default(cuid())
+  linkId         String
+  date           DateTime
+  clicks         Int      @default(0)
+  uniqueVisitors Int      @default(0)
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@unique([linkId, date])
+  @@index([linkId, date])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  keyHash    String    @unique
+  prefix     String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([keyHash])
+  @@index([prefix])
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  linkId        String
+  reason        String
+  description   String?
+  reporterEmail String?
+  status        String       @default("PENDING") // PENDING, INVESTIGATING, RESOLVED, DISMISSED
+  createdAt     DateTime     @default(now())
+  resolvedAt    DateTime?
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([status])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  metadata  String?  // JSON string
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
