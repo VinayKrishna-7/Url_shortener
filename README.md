@@ -3,7 +3,7 @@
 <p align="center">
   <strong>Short links. Powerful insights.</strong>
   <br />
-  <em>The modern, full-stack, enterprise-grade URL shortener & analytics platform.</em>
+  <em>The modern URL shortener & analytics platform.</em>
 </p>
 
 <p align="center">
@@ -20,13 +20,13 @@
 
 ## 🌟 Overview
 
-**ZapLink** is a commercial-grade, full-stack URL shortener SaaS application designed for high-scale traffic, deep marketing intelligence, and developer automation. ZapLink combines sub-millisecond redirect routing, dynamic QR code creation, fine-grained click analytics (geography, devices, operating systems, browsers, referrers), revocable API keys, and enterprise security guardrails.
+**ZapLink** is a full-stack URL shortening and analytics application built with Next.js, PostgreSQL, Prisma, and Redis. It supports custom aliases, link expiration, password protection, QR code generation, click analytics, API access, and rate limiting.
 
 ---
 
 ## ✨ Features
 
-- ⚡ **High-Speed Redirection Engine**: Optimized routing with Redis caching, non-blocking asynchronous analytics capture, and sub-10ms redirect latency.
+- ⚡ **High-Speed Redirection Engine**: Optimized routing with Redis caching, non-blocking asynchronous analytics capture,fast URL redirection with Redis caching.
 - 📊 **Real-Time Click Intelligence**:
   - Interactive clicks-over-time area charts (7-day, 30-day, 90-day, all-time filters)
   - Geographic visitor rankings with country flag identifiers
@@ -38,7 +38,7 @@
   - Multiple color preset themes
   - Scalable vector exports (SVG) and high-resolution raster exports (PNG up to 2048px)
   - Guaranteed high error-correction scannability (Level H)
-- 🔒 **Enterprise Threat & SSRF Defense**:
+- 🔒 **Security & SSRF Protection**:
   - Strict protocol enforcement (`http:` and `https:` only)
   - Rejection of dangerous protocols (`javascript:`, `data:`, `file:`, `vbscript:`, `blob:`)
   - Prevention of Server-Side Request Forgery (SSRF) by blocking localhost, loopback (`127.0.0.1`), link-local metadata endpoints (`169.254.169.254`), and private IPv4 ranges (`10.0.0.0/8`, `192.168.0.0/16`, `172.16.0.0/12`)
@@ -156,18 +156,6 @@ Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 🔐 Default Demo Accounts
-
-When running `npm run db:seed`, the database is seeded with ready-to-test accounts:
-
-| Role | Email | Password | Access Level |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@zaplink.app` | `Password123!` | Full Admin Control Center (`/admin`), Moderation, System Health |
-| **Demo User** | `demo@zaplink.app` | `Password123!` | Dashboard (`/dashboard`), Link Management, QR Studio, API Keys |
-
-*(You can also use the 1-click demo login buttons on the `/sign-in` screen!)*
-
----
 
 ## 📡 REST API Reference
 
